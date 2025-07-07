@@ -5,8 +5,6 @@ import {
 } from 'recharts';
 import ExportableSection from './ExportableSection';
 import './App.css';
-import * as htmlToImage from 'html-to-image';
-import download from 'downloadjs';
 
 function DataSummary({ data, users, type }) {
   const getData = () => {
@@ -35,9 +33,7 @@ function DataSummary({ data, users, type }) {
                 {type === 'hourly' ? item[timeKey] : item[timeKey].split('-').slice(1).join('/')}
               </th>
             ))}
-            {type !== 'hourly' && (
-              <th className="px-4 py-2 text-left text-white font-semibold border border-[#E3F2F1]">Avg</th>
-            )}
+            <th className="px-4 py-2 text-left text-white font-semibold border border-[#E3F2F1]">Avg</th>
           </tr>
         </thead>
         <tbody>
@@ -53,9 +49,7 @@ function DataSummary({ data, users, type }) {
                     {item[user] || ''}
                   </td>
                 ))}
-                {type !== 'hourly' && (
-                  <td className="px-4 py-2 font-bold text-[#004B5D] border border-[#E3F2F1]">{avg}</td>
-                )}
+                <td className="px-4 py-2 font-bold text-[#004B5D] border border-[#E3F2F1]">{avg}</td>
               </tr>
             );
           })}
@@ -76,53 +70,6 @@ DataSummary.propTypes = {
 };
 
 function App() {
-  
-  const downloadAllSnapshots = async () => {
-    console.log('Snapshot button clicked');
-    const sections = document.querySelectorAll('.exportable-section');
-    console.log('Found sections:', sections.length);
-    for (const section of sections) {
-      const id = section.getAttribute('data-id');
-      const exportTarget = section.querySelector('.snapshot-target');
-  
-      if (!exportTarget) {
-        console.warn(`No snapshot-target found in section ${id}`);
-        continue;
-      }
-  
-      try {
-        exportTarget.style.width = 'max-content';
-        const dataUrl = await htmlToImage.toPng(exportTarget, {
-          cacheBust: true,
-          backgroundColor: 'white',
-        });
-        download(dataUrl, `${id}.png`);
-        exportTarget.style.width = '';
-      } catch (error) {
-        console.error(`Failed to capture ${id}:`, error);
-      }
-    }
-  };
-  
-  const composeEmail = () => {
-    const today = new Date();
-  
-  const monthName = today.toLocaleString('en-US', { month: 'long' });
-  const day = today.getDate();
-  const startDay = (day - 7) > 0 ? (day - 7) : 1; // Avoid negative days at month start
-  const endDay = (day - 3) > 0 ? (day - 3) : 1;
-
-  // Format numbers to always be 2 digits (e.g., 01, 02, etc.)
-  const formatTwoDigits = (num) => num.toString().padStart(2, '0');
-  
-  const formattedRange = `${monthName} ${formatTwoDigits(startDay)}-${formatTwoDigits(endDay)}`;
-  const subject = `Weekly Call Report - ${formattedRange}`;
-
-  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&tf=1&su=${encodeURIComponent(subject)}`;
-
-  window.open(gmailUrl, '_blank');
-  };
-
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [labelFontSize, setLabelFontSize] = useState(10);
@@ -277,20 +224,6 @@ function App() {
   const colors = ['#2EC4B6','#F6B93B','#004B5D','#8B4B8B','#FF6F61','#6A0572','#FFD700','#17A2B8','#FF4500','#7CFC00','#1E90FF','#8A2BE2','#A52A2A','#DC143C','#32CD32','#4682B4'];
 
   return (
-   <div className="p-4">
-      <button
-        onClick={downloadAllSnapshots}
-        className="mb-4 bg-[#2EC4B6] text-white px-4 py-2 rounded shadow hover:bg-[#25a59e]"
-      >
-        Download All Snapshots
-      </button>
-
-      <button
-      onClick={composeEmail}
-      className="mb-4 ml-4 bg-[#004B5D] text-white px-4 py-2 rounded shadow hover:bg-[#003b47]"
-      >
-        Compose Email in Gmail
-      </button>
     <div className="p-8 max-w-7xl mx-auto bg-[#F7FDFC]">
       <h1 className="text-3xl font-bold mb-8 text-[#004B5D]">Outbound Call Analytics Dashboard</h1>
 
@@ -400,7 +333,6 @@ function App() {
         </div>
       )}
     </div>
-	</div>
   );
 }
 
